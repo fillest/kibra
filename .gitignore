@@ -1,0 +1,4 @@
+*.pyc
+production.ini
+kibra.egg-info/*
+venv/*

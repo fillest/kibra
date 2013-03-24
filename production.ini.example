@@ -1,0 +1,92 @@
+[app:kibra]
+use = egg:kibra
+reload_templates = false
+debug_authorization = false
+debug_notfound = false
+debug_routematch = false
+debug_templates = false
+default_locale_name = en
+sqlalchemy.url = postgresql://username:password@localhost:5432/kibra
+mako.directories = kibra:templates
+mako.module_directory = /tmp/kibra_templates
+mako.strict_undefined = true
+auth.secret = epicsecret
+auth.admin_password = epicpassword
+enable_weberror_formatter_hack = true
+
+[filter:weberror]
+use = egg:WebError#error_catcher
+debug = false
+;error_log = 
+show_exceptions_in_wsgi_errors = true
+;smtp_server = localhost
+error_email = your@example.com
+;smtp_username = janitor
+;smtp_password = "janitor's password"
+from_address = kibra@localhost
+error_subject_prefix = Kibra server error:
+;smtp_use_tls =
+error_message = An error occurred.
+
+[filter:tm]
+use = egg:repoze.tm2#tm
+commit_veto = repoze.tm:default_commit_veto
+
+[pipeline:main]
+pipeline =
+    weberror
+    tm
+    kibra
+
+[server:main]
+use = egg:gunicorn#main
+bind = 127.0.0.1:6543
+user = kibra
+group = kibra
+loglevel = info
+proc_name = kibra_gunicorn
+#do not turn this on, it leads to errors and weird behaviour
+preload_app = false
+#multiprocessing.cpu_count() * 2 + 1
+workers = 9
+pidfile = gunicorn.pid
+
+
+# Begin logging configuration
+
+[loggers]
+keys = root, kibra, sqlalchemy
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARN
+handlers = console
+
+[logger_kibra]
+level = WARN
+handlers =
+qualname = kibra
+
+[logger_sqlalchemy]
+level = WARN
+handlers =
+qualname = sqlalchemy.engine
+# "level = INFO" logs SQL queries.
+# "level = DEBUG" logs SQL queries and results.
+# "level = WARN" logs neither.  (Recommended for production systems.)
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(asctime)s %(levelname)-5.5s [%(name)s][%(threadName)s] %(message)s
+
+# End logging configuration

@@ -1,0 +1,6 @@
+include *.example *.txt *.py schema.sql
+recursive-include kibra *.mako
+recursive-include kibra/static *
+
+#include *.txt *.ini *.cfg *.rst
+#recursive-include kibra *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml
